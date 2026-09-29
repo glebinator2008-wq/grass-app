@@ -4,44 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grass Club App</title>
-    <!-- Подключаем официальный скрипт Телеграма для Web App -->
     <script src="https://telegram.org"></script>
     <style>
         body {
             background-color: #000000; /* Чистый черный фон */
             margin: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            font-family: 'Arial Black', sans-serif;
+            user-select: none; /* Чтобы текст не выделялся при частых кликах */
         }
+
+        /* Счетчик нажатий сверху */
+        .counter {
+            color: #ffffff;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Идеально круглая, брутальная кнопка */
         .main-btn {
-            background-color: #00ff66; /* Неоново-зеленая кнопка "Травы" */
+            background-color: #00ff66; /* Неоново-зеленая */
             color: #000000;
             border: none;
-            padding: 20px 50px;
-            font-size: 1.5rem;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%; /* Делает квадрат кругом */
+            font-size: 1.8rem;
             font-weight: bold;
-            border-radius: 12px;
             cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+            outline: none;
+            
+            /* Эффект объема (тень) */
+            box-shadow: 0 10px 0 #00aa44, 0 15px 25px rgba(0, 255, 102, 0.4);
+            
+            /* Плавный переход при нажатии */
+            transition: all 0.1s ease;
+            position: relative;
+        }
+
+        /* Эффект физического нажатия (кнопка уходит вниз) */
+        .main-btn:active {
+            background-color: #00dd55; /* Немного темнеет при нажатии */
+            box-shadow: 0 2px 0 #00aa44, 0 5px 10px rgba(0, 255, 102, 0.6);
+            transform: translateY(8px); /* Сдвиг вниз на размер тени */
         }
     </style>
 </head>
 <body>
 
-    <!-- Твоя единственная кнопка на экране -->
-    <button class="main-btn" id="click-btn">КНОПКА</button>
+    <!-- Наш счетчик кликов -->
+    <div class="counter" id="clicks-count">0</div>
+
+    <!-- Круглая кнопка -->
+    <button class="main-btn" id="click-btn">ЖМИ</button>
 
     <script>
-        // Инициализируем Web App Телеграма
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Расширяем приложение на весь экран телефона
+        tg.expand();
 
-        // Логика: при нажатии на кнопку приложение просто закроется
-        document.getElementById('click-btn').addEventListener('click', () => {
-            tg.close();
+        // Инициализируем переменную счетчика. 
+        // Пытаемся достать старое значение из памяти телефона, если его нет — ставим 0.
+        let count = localStorage.setItem('grass_clicks') ? parseInt(localStorage.setItem('grass_clicks')) : 0;
+        
+        const counterElement = document.getElementById('clicks-count');
+        const buttonElement = document.getElementById('click-btn');
+
+        // Сразу отображаем сохраненное количество кликов
+        counterElement.innerText = count;
+
+        // Логика клика
+        buttonElement.addEventListener('click', () => {
+            count++; // Увеличиваем счетчик на 1
+            counterElement.innerText = count; // Обновляем цифру на экране
+            
+            // Сохраняем новое значение в память телефона (LocalStorage),
+            // чтобы при перезапуске приложения счетчик не сбрасывался на ноль!
+            localStorage.setItem('grass_clicks', count); // Теперь всё четко
         });
     </script>
 </body>
 </html>
+
