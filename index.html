@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grass Club App</title>
+    <!-- Подключаем официальный скрипт Телеграма для Web App -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            background-color: #000000; /* Чистый черный фон */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .main-btn {
+            background-color: #00ff66; /* Неоново-зеленая кнопка "Травы" */
+            color: #000000;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Твоя единственная кнопка на экране -->
+    <button class="main-btn" id="click-btn">КНОПКА</button>
+
+    <script>
+        // Инициализируем Web App Телеграма
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Расширяем приложение на весь экран телефона
+
+        // Логика: при нажатии на кнопку приложение просто закроется
+        document.getElementById('click-btn').addEventListener('click', () => {
+            tg.close();
+        });
+    </script>
+</body>
+</html>
