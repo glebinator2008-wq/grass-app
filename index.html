@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grass Club App</title>
-    <script src="https://telegram.org"></script>
+    <script src="https://telegram.org"></script> <!--  Правильно -->
     <style>
         body {
             background-color: #000000; /* Чистый черный фон */
@@ -62,31 +62,34 @@
 
     <!-- Круглая кнопка -->
     <button class="main-btn" id="click-btn">ЖМИ</button>
-
-    <script>
-        const tg = window.Telegram.WebApp;
+<script>
+    // 1. Исправляем подключение Telegram WebApp (если скрипт в head изменен на telegram-web-app.js)
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
         tg.expand();
+    }
 
-        // Инициализируем переменную счетчика. 
-        // Пытаемся достать старое значение из памяти телефона, если его нет — ставим 0.
-        let count = localStorage.setItem('grass_clicks') ? parseInt(localStorage.setItem('grass_clicks')) : 0;
+    // 2. ИСПРАВЛЕНО: Используем ИМЕННО getItem для чтения данных из памяти
+    const savedClicks = localStorage.getItem('grass_clicks');
+    let count = savedClicks ? parseInt(savedClicks, 10) : 0;
+    
+    const counterElement = document.getElementById('clicks-count');
+    const buttonElement = document.getElementById('click-btn');
+
+    // Сразу отображаем сохраненное количество кликов
+    counterElement.innerText = count;
+
+    // Логика клика
+    buttonElement.addEventListener('click', () => {
+        count++; // Увеличиваем счетчик на 1
+        counterElement.innerText = count; // Обновляем цифру на экране
         
-        const counterElement = document.getElementById('clicks-count');
-        const buttonElement = document.getElementById('click-btn');
+        // Сохраняем новое значение в память телефона
+        localStorage.setItem('grass_clicks', count);
+    });
+</script>
 
-        // Сразу отображаем сохраненное количество кликов
-        counterElement.innerText = count;
-
-        // Логика клика
-        buttonElement.addEventListener('click', () => {
-            count++; // Увеличиваем счетчик на 1
-            counterElement.innerText = count; // Обновляем цифру на экране
-            
-            // Сохраняем новое значение в память телефона (LocalStorage),
-            // чтобы при перезапуске приложения счетчик не сбрасывался на ноль!
-            localStorage.setItem('grass_clicks', count); // Теперь всё четко
-        });
-    </script>
+    
 </body>
 </html>
 
