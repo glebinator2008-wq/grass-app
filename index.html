@@ -4,26 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grass Club App</title>
-    <script src="https://telegram.org"></script> <!--  Правильно -->
+    <!-- Правильное подключение Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-       body {
-    background-color: #000000;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: 'Arial Black', sans-serif;
-    user-select: none; 
-
-    /* 👇 ДОБАВЬТЕ ЭТУ СТРОКУ, ЧТОБЫ УБРАТЬ СИНЮЮ ПОДСВЕТКУ НА ТЕЛЕФОНАХ */
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
-    
-    /* Дополнительно: убирает системное масштабирование текста */
-    -webkit-text-size-adjust: 100%;
-}
-
+        body {
+            background-color: #000000; /* Чистый черный фон */
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial Black', sans-serif;
+            user-select: none; /* Блокируем выделение текста */
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* Убираем синюю рамку */
+            -webkit-text-size-adjust: 100%;
+            overflow: hidden; /* Чтобы вылетающие элементы случайно не растягивали экран */
+        }
 
         /* Счетчик нажатий сверху */
         .counter {
@@ -33,32 +30,53 @@
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
-        /* Идеально круглая, брутальная кнопка */
+        /* Идеально круглая кнопка */
         .main-btn {
             background-color: #00ff66; /* Неоново-зеленая */
             color: #000000;
             border: none;
             width: 200px;
             height: 200px;
-            border-radius: 50%; /* Делает квадрат кругом */
+            border-radius: 50%; 
             font-size: 1.8rem;
             font-weight: bold;
             cursor: pointer;
             outline: none;
-            
-            /* Эффект объема (тень) */
             box-shadow: 0 10px 0 #00aa44, 0 15px 25px rgba(0, 255, 102, 0.4);
-            
-            /* Плавный переход при нажатии */
-            transition: all 0.1s ease;
+            transition: transform 0.05s ease, box-shadow 0.05s ease;
             position: relative;
+            z-index: 2; /* Кнопка поверх эффектов, если нужно */
         }
 
-        /* Эффект физического нажатия (кнопка уходит вниз) */
-        .main-btn:active {
-            background-color: #00dd55; /* Немного темнеет при нажатии */
+        /* Класс для эффекта нажатия (управляется через JS) */
+        .main-btn.pressed {
+            background-color: #00dd55; 
             box-shadow: 0 2px 0 #00aa44, 0 5px 10px rgba(0, 255, 102, 0.6);
-            transform: translateY(8px); /* Сдвиг вниз на размер тени */
+            transform: translateY(8px); 
+        }
+
+        /* Стили для летающего текста "+1" */
+        .floating-one {
+            position: absolute;
+            color: #00ff66; /* Зелёный цвет цифры */
+            font-size: 2.2rem;
+            font-weight: bold;
+            pointer-events: none; /* Пропускает клики сквозь себя */
+            z-index: 10;
+            animation: flyAndFade 0.6s ease-out forwards; /* Анимация на 0.6 секунды */
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+        }
+
+        /* Анимация: летит вверх, увеличивается и исчезает */
+        @keyframes flyAndFade {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.4) translateY(-120px); /* Улетает на 120px вверх */
+            }
         }
     </style>
 </head>
@@ -69,35 +87,95 @@
 
     <!-- Круглая кнопка -->
     <button class="main-btn" id="click-btn">ЖМИ</button>
-<script>
-    // 1. Исправляем подключение Telegram WebApp (если скрипт в head изменен на telegram-web-app.js)
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-        tg.expand();
-    }
 
-    // 2. ИСПРАВЛЕНО: Используем ИМЕННО getItem для чтения данных из памяти
-    const savedClicks = localStorage.getItem('grass_clicks');
-    let count = savedClicks ? parseInt(savedClicks, 10) : 0;
-    
-    const counterElement = document.getElementById('clicks-count');
-    const buttonElement = document.getElementById('click-btn');
+    <script>
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+        }
 
-    // Сразу отображаем сохраненное количество кликов
-    counterElement.innerText = count;
-
-    // Логика клика
-    buttonElement.addEventListener('click', () => {
-        count++; // Увеличиваем счетчик на 1
-        counterElement.innerText = count; // Обновляем цифру на экране
+        // Загружаем сохраненные клики
+        const savedClicks = localStorage.getItem('grass_clicks');
+        let count = savedClicks ? parseInt(savedClicks, 10) : 0;
         
-        // Сохраняем новое значение в память телефона
-        localStorage.setItem('grass_clicks', count);
-    });
-</script>
+        const counterElement = document.getElementById('clicks-count');
+        const buttonElement = document.getElementById('click-btn');
 
-    
+        counterElement.innerText = count;
+
+        // Основная функция обработки одного нажатия
+        function handleTap(clientX, clientY) {
+            count++;
+            counterElement.innerText = count;
+            localStorage.setItem('grass_clicks', count);
+
+            // Запускаем легкую вибрацию в Telegram при каждом тапе
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+
+            // Создаем элемент "+1"
+            createFloatingOne(clientX, clientY);
+        }
+
+        // Функция динамического создания "+1" в точке нажатия
+        function createFloatingOne(x, y) {
+            const one = document.createElement('div');
+            one.className = 'floating-one';
+            one.innerText = '+1';
+            
+            // Задаем точные координаты появления
+            one.style.left = x + 'px';
+            one.style.top = y + 'px';
+            
+            document.body.appendChild(one);
+            
+            // Удаляем элемент из HTML сразу после завершения CSS-анимации
+            setTimeout(() => {
+                one.remove();
+            }, 600); // 600мс совпадает со временем анимации в CSS
+        }
+
+        // СЛУШАТЕЛЬ ДЛЯ МОБИЛЬНЫХ (Мультитач)
+        buttonElement.addEventListener('touchstart', (e) => {
+            // Предотвращаем симуляцию клика мышкой и зум экрана
+            e.preventDefault(); 
+            
+            // Визуально «вжимаем» кнопку
+            buttonElement.classList.add('pressed');
+
+            // e.targetTouches содержит информацию обо всех пальцах, коснувшихся кнопки прямо сейчас
+            // Проходимся циклом по каждому новому касанию
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                handleTap(touch.clientX, touch.clientY);
+            }
+        });
+
+        // Убираем эффект «вжатия» кнопки, когда пальцы отпускают её
+        buttonElement.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            // Если на экране больше нет пальцев, возвращаем кнопку в исходное положение
+            if (e.targetTouches.length === 0) {
+                buttonElement.classList.remove('pressed');
+            }
+        });
+
+        // СЛУШАТЕЛЬ ДЛЯ ПК (Оставляем обычный клик мышкой для тестов)
+        buttonElement.addEventListener('mousedown', (e) => {
+            // Игнорируем, если это мобилка (чтобы не было двойных срабатываний)
+            if ('ontouchstart' in window) return;
+            
+            buttonElement.classList.add('pressed');
+            handleTap(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mouseup', () => {
+            buttonElement.classList.remove('pressed');
+        });
+    </script>
 </body>
 </html>
+
 
 
