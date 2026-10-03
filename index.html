@@ -6,17 +6,24 @@
     <title>Grass Club App</title>
     <script src="https://telegram.org"></script> <!--  Правильно -->
     <style>
-        body {
-            background-color: #000000; /* Чистый черный фон */
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: 'Arial Black', sans-serif;
-            user-select: none; /* Чтобы текст не выделялся при частых кликах */
-        }
+       body {
+    background-color: #000000;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial Black', sans-serif;
+    user-select: none; 
+
+    /* 👇 ДОБАВЬТЕ ЭТУ СТРОКУ, ЧТОБЫ УБРАТЬ СИНЮЮ ПОДСВЕТКУ НА ТЕЛЕФОНАХ */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
+    
+    /* Дополнительно: убирает системное масштабирование текста */
+    -webkit-text-size-adjust: 100%;
+}
+
 
         /* Счетчик нажатий сверху */
         .counter {
@@ -92,4 +99,5 @@
     
 </body>
 </html>
+
 
